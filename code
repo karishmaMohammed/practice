@@ -1,0 +1,454 @@
+import React, { useState, useEffect } from "react";
+import { ASSET_PREFIX_URL } from "../../constants/config";
+import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import "../OrganizationFlow/Org.css";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import {
+  BASE_URL,
+  PHOTO_LINK,
+  DEFAULT_PHOTO,
+  DEFAULT_COMPANY_LINK,
+} from "../../constants/config";
+import axios from "axios";
+import Cookies from "js-cookie";
+import ticketIcon from "../../assets/ticket-icon.svg";
+import templateIcon from "../../assets/template-icon.svg";
+import { useTour } from "@reactour/tour";
+import { hierarchySteps } from "../Common/TourGuides/TourSteps";
+// templateSteps={templateSteps} emptyTemplateSteps={emptyTemplateSteps} ticketSteps={ticketSteps}
+// emptyTicketSteps={emptyTicketSteps}
+function TicketLeftHOC({
+  staredDept,
+  heirarchySteps,
+  hierarchyAssitantSteps,
+  hierarchyEmptySteps,
+  emptyTemplateSteps,
+  ticketSteps,
+  emptyTicketSteps,
+}) {
+  const [showPhotos, setShowPhotos] = useState(true);
+  const [smallNext, setSmallNext] = useState(false);
+  // const [setUpShow, setSetUpShow] = useState(false);
+  const [activeMenuItem, setActiveMenuItem] = useState("");
+  const { department } = useParams();
+  const { setIsOpen, setSteps, isOpen, close } = useTour();
+  const [hasOpened, setHasOpened] = useState(false);
+  const { id } = useParams();
+  const nav = useNavigate();
+
+  useEffect(() => {
+    const token = Cookies.get("token");
+    if (!token) {
+      nav("/login");
+    }
+
+    return () => {};
+  }, [nav]);
+
+  const location = useLocation();
+
+  const handleTogglePhotos = () => {
+    setShowPhotos(!showPhotos);
+    if (!showPhotos) {
+      setSmallNext(!smallNext);
+    }
+  };
+
+  // const handleMenuItemClick = (menuItem) => {
+
+  //   setActiveMenuItem(menuItem);
+
+  //   if (menuItem === "teams") {
+
+  //     nav("/org-home");
+
+  //   } else if (menuItem === "template") {
+  //     nav("/template");
+
+  //   } else if (menuItem === "ticket") {
+  //     nav("/all-list");
+
+  //   } else if (menuItem === "overview") {
+  //     nav("/overview");
+
+  //   } else if (menuItem === "departments") {
+  //     nav("/depart-list");
+
+  //   } else if (menuItem === "analytics") {
+
+  //   } else if (menuItem === "settings") {
+  //     nav("/settings");
+  //   }
+  // };
+
+  const handleMenuItemClick = (menuItem) => {
+    setActiveMenuItem(menuItem);
+
+    switch (menuItem) {
+      case "teams":
+        nav("/org-home");
+        break;
+      case "part-num":
+        nav("/part-number");
+        break;
+      case "template":
+        nav("/template");
+        break;
+      case "ticket":
+        nav("/all-list");
+        break;
+      case "overview":
+        nav("/overview");
+        break;
+      case "departments":
+        nav("/depart-list");
+        break;
+      case "analytics":
+        // Handle analytics case
+        break;
+      case "settings":
+        nav("/settings");
+        break;
+      default:
+      // Handle default case
+    }
+  };
+
+  // const handleMenuItemClick = (menuItem) => {
+  //   setActiveMenuItem(menuItem);
+
+  //   switch (menuItem) {
+  //     case "teams":
+  //       window.location.pathname = "/org-home";
+  //       break;
+  //     case "template":
+  //       window.location.pathname = "/template";
+  //       break;
+  //     case "ticket":
+  //       window.location.pathname = "/all-list";
+  //       break;
+  //     case "overview":
+  //       window.location.pathname = "/overview";
+  //       break;
+  //     case "departments":
+  //       window.location.pathname = "/depart-list";
+  //       break;
+  //     case "analytics":
+  //       // Handle analytics page
+  //       break;
+  //     case "settings":
+  //       window.location.pathname = "/settings";
+  //       break;
+  //     default:
+  //       // Handle default case
+  //   }
+  // };
+
+  const containerStyles = {
+    width: showPhotos ? "260px" : "93px",
+    transition: "width 0.5s ease",
+  };
+  useEffect(() => {
+    const pathname = location.pathname;
+
+    if (pathname === "/org-home") {
+      setActiveMenuItem("teams");
+    } else if (pathname === "/part-num") {
+      setActiveMenuItem("part-num");
+    }
+    else if (pathname.startsWith("/template")) {
+      setActiveMenuItem("template");
+    } else if (pathname === "/overview") {
+      setActiveMenuItem("overview");
+    } else if (pathname === "/depart-list") {
+      setActiveMenuItem("departments");
+    } else if (pathname === "/settings") {
+      setActiveMenuItem("settings");
+    } else if (
+      pathname === "/all-list" ||
+      pathname.startsWith("/ticket-view")
+    ) {
+      setActiveMenuItem("ticket");
+    } else if (pathname === `/department-ticket/${department}/${id}`) {
+      setActiveMenuItem(id);
+    }
+  }, [location.pathname]);
+
+  const handleClick = (department, id) => {
+    setActiveMenuItem(id);
+    nav(`/department-ticket/${department}/${id}`);
+
+    // window.location.reload();
+  };
+  return (
+    // <>
+    //   <TicketTemplateTopNav />
+    <div className="ticket-template-page">
+      <div
+        style={containerStyles}
+        className={`template-sidebar-menu ${smallNext ? "small-next" : ""} ${
+          showPhotos ? "sidebar-expanded" : "sidebar-collapsed"
+        }`}
+      >
+        {/* DEFAULT_COMPANY_LINK */}
+        <div className="profile-org">
+          {/* {showPhotos ? (
+            <div className="profile-container">
+              {orgPhoto ?  <img
+                src={PHOTO_LINK + orgPhoto}
+                alt={companyName}
+                style={{ width: "50px", height: "50px", borderRadius: "8px" }}
+              />: <img
+              src={DEFAULT_COMPANY_LINK}
+              alt={companyName}
+              style={{ width: "50px", height: "50px", borderRadius: "8px" }}
+            />}
+             
+              <div className="profile-details">
+                <span className="org-name">{companyName}</span>
+                <span className="org-type">Hardware project</span>
+              </div>
+            </div>
+          ) : (
+            <div className="profile-container">
+              {orgPhoto ?  <img
+                src={PHOTO_LINK +orgPhoto}
+                alt={companyName}
+                style={{ width: "50px", height: "50px", borderRadius: "8px" }}
+              />: <img
+              src={DEFAULT_COMPANY_LINK}
+              alt={companyName}
+              style={{ width: "50px", height: "50px", borderRadius: "8px" }}
+            />}
+             
+            </div>
+          )} */}
+          <div
+            className="next-btn"
+            onClick={handleTogglePhotos}
+            style={{ cursor: "pointer" }}
+          >
+            {showPhotos ? (
+              <KeyboardArrowLeftRoundedIcon />
+            ) : (
+              <KeyboardArrowRightRoundedIcon />
+            )}
+          </div>
+        </div>
+        {/* {showPhotos ? (
+          <div className="horizontalline"></div>
+        ) : (
+          <div className="horizontalline1"></div>
+        )} */}
+        <div className="menu">
+          {/* {setUpShow ? <>
+            {showPhotos ? (
+            <div
+              className={`menu-details ${activeMenuItem === "overview" ? "active" : ""
+                }`}
+              onClick={() => handleMenuItemClick("overview")}
+            >
+              <img src={`${ASSET_PREFIX_URL}overview.svg`} alt="Overview" />
+              <span>Setup</span>
+            </div>
+          ) : (
+            <div
+              className={`menu-details ${activeMenuItem === "overview" ? "active" : ""
+                }`}
+              onClick={() => handleMenuItemClick("overview")}
+            >
+              <img src={`${ASSET_PREFIX_URL}overview.svg`} alt="Overview" />
+            </div>
+          )}
+          </>:''} */}
+
+          {showPhotos ? (
+            <div
+              className={`menu-details ${
+                activeMenuItem === "teams" ? "active" : ""
+              }`}
+              onClick={() => handleMenuItemClick("teams")}
+            >
+              <img src={`${ASSET_PREFIX_URL}org-structure.svg`} alt="teams" />
+              <span>Hierarchy</span>
+            </div>
+          ) : (
+            <div
+              title="Org Hierarchy"
+              className={`menu-details ${
+                activeMenuItem === "teams" ? "active" : ""
+              }`}
+              onClick={() => handleMenuItemClick("teams")}
+            >
+              <img src={`${ASSET_PREFIX_URL}org-structure.svg`} alt="teams" />
+            </div>
+          )}
+          {showPhotos ? (
+            <div
+              className={`menu-details ${
+                activeMenuItem === "part-num" ? "active" : ""
+              }`}
+              onClick={() => handleMenuItemClick("part-num")}
+            >
+              {/* <img src={`${ASSET_PREFIX_URL}part-num.svg`} alt="part-num" /> */}
+              <img src={`${ASSET_PREFIX_URL}part-num.png`} alt="part-num" />
+              <span>Part Number</span>
+            </div>
+          ) : (
+            <div
+              title="part-number"
+              className={`menu-details ${
+                activeMenuItem === "part-num" ? "active" : ""
+              }`}
+              onClick={() => handleMenuItemClick("part-num")}
+            >
+              {/* <img src={`${ASSET_PREFIX_URL}part-num.svg`} alt="part-num" /> */}
+              <img src={`${ASSET_PREFIX_URL}part-num.png`} alt="part-num" />
+            </div>
+          )}
+          {showPhotos ? (
+            <div
+              data-tour="step-template"
+              className={`menu-details ${
+                activeMenuItem === "template" ? "active" : ""
+              }`}
+              onClick={() => handleMenuItemClick("template")}
+            >
+              {/* <img src={`${ASSET_PREFIX_URL}template.svg`} alt="template" /> */}
+              <img src={templateIcon} alt="template" />
+              <span>Template</span>
+            </div>
+          ) : (
+            <div
+              title="template"
+              className={`menu-details ${
+                activeMenuItem === "template" ? "active" : ""
+              }`}
+              onClick={() => handleMenuItemClick("template")}
+            >
+              {/* <img src={`${ASSET_PREFIX_URL}template.svg`} alt="template" /> */}
+              <img src={templateIcon} alt="template" />
+            </div>
+          )}
+          {showPhotos ? (
+            <div
+              data-tour="step-ticket"
+              className={`menu-details ${
+                activeMenuItem === "ticket" ? "active" : ""
+              }`}
+              onClick={() => handleMenuItemClick("ticket")}
+            >
+              {/* <img src={`${ASSET_PREFIX_URL}template.svg`} alt="template" /> */}
+              <img src={ticketIcon} alt="template" />
+              <span>Tickets</span>
+            </div>
+          ) : (
+            <div
+              title="tickets"
+              className={`menu-details ${
+                activeMenuItem === "ticket" ? "active" : ""
+              }`}
+              onClick={() => handleMenuItemClick("ticket")}
+            >
+              {/* <img src={`${ASSET_PREFIX_URL}template.svg`} alt="template" /> */}
+              <img src={ticketIcon} alt="template" />
+            </div>
+          )}
+        </div>
+        {showPhotos ? (
+          <div className="horizontalline"></div>
+        ) : (
+          <div className="horizontalline1"></div>
+        )}
+        {/* department-details */}
+        <div>
+          {showPhotos ? (
+            <div
+              data-tour="step-depart"
+              className={`menu-details ${
+                activeMenuItem === "departments" ? "active" : ""
+              }`}
+              onClick={() => handleMenuItemClick("departments")}
+            >
+              <div className="program-template">
+                <img src={`${ASSET_PREFIX_URL}programs.svg`} alt="template" />
+                <span>Departments</span>
+              </div>
+            </div>
+          ) : (
+            <div
+              title="departments"
+              className={`menu-details ${
+                activeMenuItem === "departments" ? "active" : ""
+              }`}
+              onClick={() => handleMenuItemClick("departments")}
+            >
+              <img src={`${ASSET_PREFIX_URL}programs.svg`} alt="template" />
+            </div>
+          )}
+          {showPhotos ? (
+            staredDept.map((name, index) => (
+              <div
+                className={`prg-org ${
+                  activeMenuItem === name.departmentID ? "active" : ""
+                }`}
+                key={index}
+                onClick={() =>
+                  handleClick(name.departmentName, name.departmentID)
+                }
+              >
+                <span>{name.departmentName}</span>
+              </div>
+            ))
+          ) : (
+            <div className="prg-org">
+              <span></span>
+            </div>
+          )}
+          {/* {showPhotos ? (
+            <div
+              className="prf-setting"
+              style={{ cursor: "pointer" }}
+              onClick={() => handleMenuItemClick("settings")}
+            >
+              <div className="user-prf">
+                <div className="prf-picture">
+                  {photo ? (
+                    <img src={PHOTO_LINK + photo} alt="" />
+                  ) : (
+                    <img src={DEFAULT_PHOTO} alt="" />
+                  )}
+                 
+
+                  <div className="online-status"></div>
+                </div>
+
+                <span title={memberName}>
+                {memberName.length > 14 ? memberName.substring(0, 12) + '...' : memberName}</span>
+              </div>
+              <SettingsOutlinedIcon />
+            </div>
+          ) : (
+            <div
+              className="prf-picture"
+              onClick={() => handleMenuItemClick("settings")}
+              style={{ cursor: "pointer" }}
+            >
+              {photo ? (
+                <img src={PHOTO_LINK + photo} alt="" />
+              ) : (
+                <img src={DEFAULT_PHOTO} alt="" />
+              )}
+              <div className="online-status"></div>
+            </div>
+          )} */}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default TicketLeftHOC;
