@@ -1,0 +1,187 @@
+import React, { useState } from "react";
+import "./PartNumber.css";
+import Select from "react-select";
+import { ASSET_PREFIX_URL } from "../../constants/config";
+
+const arrays = [
+  {
+    type: "Alphabet",
+    meaning: "example",
+    value: "A",
+    variables: ["Fixed", "Count"],
+  },
+  {
+    type: "Character",
+    meaning: "example",
+    value: "#",
+    variables: ["Fixed", "Count"],
+  },
+  {
+    type: "Number",
+    meaning: "example",
+    value: 2,
+    variables: ["Fixed", "Count"],
+  },
+];
+function PartNumber() {
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [rightSectionItems, setRightSectionItems] = useState(arrays);
+  const [dropElements, setDropElements] = useState(false);
+  
+ 
+  const variablesArray = ["Fixed", "Count"];
+  const dragableItemsArrays = [
+    {
+      type: "Alphabet",
+      photo: `${ASSET_PREFIX_URL}part-num-alpha.png`,
+    },
+    {
+      type: "Numeric",
+      photo: `${ASSET_PREFIX_URL}part-num-text.png`,
+    },
+    {
+      type: "Special Character",
+      photo: `${ASSET_PREFIX_URL}paert-num-char.png`,
+    },
+  ];
+  const formattedVersions = Array.from(variablesArray).map((version) => ({
+    value: version,
+    label: `${version}`,
+  }));
+  console.log(formattedVersions);
+
+  const handleDragStart = (item) => {
+    setDraggedItem(item);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = () => {
+    setRightSectionItems([...rightSectionItems, draggedItem]);
+    setDraggedItem(null);
+    setDropElements(true)
+  };
+
+  const moveItem = (fromIndex, toIndex) => {
+    const draggedItem = rightSectionItems[fromIndex];
+    const newItems = [...rightSectionItems];
+    newItems.splice(fromIndex, 1);
+    newItems.splice(toIndex, 0, draggedItem);
+    setRightSectionItems(newItems);
+  };
+
+  return (
+    <div className="part-num-page">
+      <div className="part-num-top">
+        <div className="part-num-content">
+          <img src={`${ASSET_PREFIX_URL}template-back-btn.svg`} alt="back" />
+          <div className="part-num-line"></div>
+          <span>Part number and naming</span>
+        </div>
+        <button className="part-num-active">Save</button>
+        <button className="part-num-inactive">Save</button>
+      </div>
+      <div className="part-num-bottom">
+        <div className="part-num-bottom-left">
+          <div className="part-num-bottom-left-text">
+            <span className="part-num-bottom-left-title">
+              Choose naming convention
+            </span>
+            <span className="part-num-bottom-left-desc">
+              Drag and drop form elements in additional section
+            </span>
+          </div>
+          <div className="part-num-bottom-left-dragable">
+            {dragableItemsArrays.map((ele) => (
+              <div
+                className="part-num-bottom-left-items"
+                draggable
+                onDragStart={() => handleDragStart(ele)}
+              >
+                <img src={ele.photo} alt="" />
+                <span>{ele.type}</span>
+              </div>
+            ))}
+          </div>
+          <div className="part-num-bottom-left-msg">
+            <span>
+              Message to show when this will get un-lock or get enabled
+            </span>
+          </div>
+        </div>
+        <div className="part-num-bottom-right">
+          <div className="part-num-bottom-nomenclature">
+            <span className="part-num-bottom-right-title">
+              Part naming nomenclarture
+            </span>
+            <br />
+            <span className="part-num-bottom-right-desc">
+              Drag and drop the fields in the order you want to create the part
+              naming system for your company
+            </span>
+            <span className="part-num-bottom-right-desc">
+              e.g. AA-11-BBBB. Drag Alphabet from left and specify length = 2 in
+              drop-down. Similarly do the next as numberic and set length=2 and
+              so on
+            </span>
+          </div>
+          <div className="part-num-bottom-partName">
+            <span className="part-num-bottom-right-partName-desc">
+              Partname based on your inputs
+            </span>
+            <span className="part-num-bottom-right-partName-title">AA-</span>
+          </div>
+          <div
+            className="part-number-dropping-zone"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            {!dropElements && (
+              <div className="empty-drop-message">
+                <span>No items dropped yet.</span>
+              </div>
+            )}
+            {rightSectionItems.map((index) => (
+              <div className="part-num-bottom-cont">
+                <div className="part-num-bottom-box">
+                  <div className="template-drag-box-right">
+                    <div className="dots"></div>
+                    <div className="dots"></div>
+                    <div className="dots"></div>
+                  </div>
+                  <div className="template-drag-box-left">
+                    <div className="dots"></div>
+                    <div className="dots"></div>
+                    <div className="dots"></div>
+                  </div>
+                </div>
+                <div className="part-num-bottom-alpha">
+                  <span className="part-num-bottom-alpha-title">{index.type}</span>
+                  <span className="part-num-bottom-alpha-desc">2</span>
+                </div>
+                <div className="part-num-bottom-alpha">
+                  <span className="part-num-bottom-alpha-title">meaning</span>
+                  <span className="part-num-bottom-alpha-desc">meaning</span>
+                </div>
+                <div className="part-num-bottom-alpha">
+                  <span className="part-num-bottom-alpha-title">variables</span>
+                  <Select options={formattedVersions} />
+                </div>
+                <div className="part-num-bottom-btn-fixed">
+                  <button>Add Fixed Variables*</button>
+                </div>
+                <div className="part-num-bottom-btn-cancel">
+                  <img src={`${ASSET_PREFIX_URL}close-icon-part-num.png`} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default PartNumber;
